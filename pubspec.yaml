@@ -40,6 +40,7 @@ dependencies:
   firebase_core: ^4.3.0
   supabase_flutter: ^2.12.0
   flutter_dotenv: ^6.0.0
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
@@ -63,11 +64,8 @@ flutter_icons:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/images/welcome.png
-    - assets/icon/email.png
-    - assets/icon/OTP.png
-    - assets/icon/ZAPP.png
-    - assets/icon/locked.png
+    - assets/images/
+    - assets/icon/
     - .env
 
   # The following line ensures that the Material Icons font is

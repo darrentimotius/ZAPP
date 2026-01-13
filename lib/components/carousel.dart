@@ -10,16 +10,16 @@ class TopCarousel extends StatefulWidget {
 class _TopCarouselState extends State<TopCarousel> {
   final List<Map<String, String>> items = [
     {
-      "image": "https://images.unsplash.com/photo-1558002038-1055907df827",
+      "image": "assets/images/carousel1.jpg",
       "title": "6 Tips Menghindari Bahaya Aliran Listrik Saat Banjir"
     },
     {
-      "image": "https://images.unsplash.com/photo-1558002038-1055907df827",
-      "title": "6 Tips Menghindari Bahaya Aliran Listrik Saat Banjir"
+      "image": "assets/images/carousel2.jpg",
+      "title": "Waspada Bahaya Listrik di Musim Hujan"
     },
     {
-      "image": "https://images.unsplash.com/photo-1558002038-1055907df827",
-      "title": "6 Tips Menghindari Bahaya Aliran Listrik Saat Banjir"
+      "image": "assets/images/carousel3.jpg",
+      "title": "Sering Tertukar, Ini Perbedaan Meteran Listrik dan MCB"
     },
   ];
 
@@ -47,7 +47,7 @@ class _TopCarouselState extends State<TopCarousel> {
                   children: [
                     Stack(
                       children: [
-                        Image.network(
+                        Image.asset(
                           item["image"]!,
                           height: 160,
                           width: double.infinity,

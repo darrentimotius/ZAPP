@@ -135,7 +135,21 @@ class HomeContent extends StatelessWidget {
   Widget _header(BuildContext context) {
     return Row(
       children: [
-        const CircleAvatar(radius: 22),
+        CircleAvatar(
+          radius: 22,
+          backgroundColor: Colors.grey.shade300,
+          child: ClipOval(
+            child: Image.asset(
+              "assets/icon/profile.jpg",
+              width: 44,
+              height: 44,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.person, color: Colors.white);
+              },
+            ),
+          ),
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -217,11 +231,6 @@ class HomeContent extends StatelessWidget {
                 builder: (context) => const AddRoom(),
               ),
             );
-
-            if (result != null) {
-              // contoh: update state / list room
-              debugPrint("Room baru: $result");
-            }
           },
           child: const Text("+ Add room"),
         ),
@@ -232,12 +241,33 @@ class HomeContent extends StatelessWidget {
 
   Widget _roomGrid() {
     final items = [
-      {"percent": 12, "name": "Kitchen", "isSelected": true},
-      {"percent": 24, "name": "Home Office"},
-      {"percent": 9, "name": "Bedroom"},
-      {"percent": 11, "name": "Bathroom"},
-      {"percent": 100, "name": "Gaming room"},
+      {
+        "percent": 12,
+        "name": "Kitchen",
+        "image": "assets/images/kitchen.jpg",
+      },
+      {
+        "percent": 24,
+        "name": "Home Office",
+        "image": "assets/images/home_office.jpg",
+      },
+      {
+        "percent": 9,
+        "name": "Bedroom",
+        "image": "assets/images/bedroom.jpg",
+      },
+      {
+        "percent": 11,
+        "name": "Bathroom",
+        "image": "assets/images/bathroom.jpg",
+      },
+      {
+        "percent": 100,
+        "name": "Gaming room",
+        "image": "assets/images/gaming_room.jpg",
+      },
     ];
+
 
     return Wrap(
       spacing: 12,
@@ -246,9 +276,10 @@ class HomeContent extends StatelessWidget {
         return RoomUsageCard(
           percentage: e["percent"] as int,
           label: e["name"] as String,
-          isSelected: e["isSelected"] == true,
+          imagePath: e["image"] as String,
         );
       }).toList(),
     );
+
   }
 }
