@@ -31,8 +31,6 @@ class _RegisterPageState extends State<RegisterPage> {
     confirmCtrl.dispose();
     super.dispose();
   }
-
-  // PASSWORD VALIDATION
   String? validatePassword(String password) {
     if (password.length < 6) {
       return 'Password minimal 6 karakter';
@@ -52,7 +50,6 @@ class _RegisterPageState extends State<RegisterPage> {
     return null;
   }
 
-  // REGISTER LOGIC
   Future<void> _completeRegistration() async {
     final username = usernameCtrl.text.trim();
     final password = passwordCtrl.text;
@@ -81,12 +78,9 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      // Set password to Supabase Auth
       await supabase.auth.updateUser(
         UserAttributes(password: password),
       );
-
-      // Save username to profiles
       await supabase.from('profiles').insert({
         'id': user.id,
         'username': username,
@@ -122,8 +116,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
 
           const SizedBox(height: 24),
-
-          // USERNAME
           const Text("Username"),
           const SizedBox(height: 6),
           TextField(
@@ -142,8 +134,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
 
           const SizedBox(height: 16),
-
-          // PASSWORD
           const Text("Password"),
           const SizedBox(height: 6),
           TextField(
@@ -175,8 +165,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
 
           const SizedBox(height: 16),
-
-          // CONFIRM PASSWORD
           const Text("Confirm Password"),
           const SizedBox(height: 6),
           TextField(
