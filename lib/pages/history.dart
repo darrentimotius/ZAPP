@@ -21,12 +21,20 @@ class _HistoryState extends State<HistoryPage> {
 
   final int _startYear = 2015;
   final int _endYear = 2026;
+  late int _yearPageStart;
+  static const int _yearPageSize = 12;
 
   String selectedRoom = 'Select';
   @override
   void dispose() {
     _roomNameController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _yearPageStart = _startYear;
   }
 
   Widget _segmentedButton() {
@@ -88,7 +96,6 @@ class _HistoryState extends State<HistoryPage> {
       case DateMode.day:
         return Column(
           children: [
-            const SizedBox(height: 8),
             _dayPicker(),
             const SizedBox(height: 25),
           ],
@@ -96,7 +103,6 @@ class _HistoryState extends State<HistoryPage> {
       case DateMode.month:
         return Column(
           children: [
-            const SizedBox(height: 8),
             _monthPicker(),
             const SizedBox(height: 25),
           ],
@@ -104,7 +110,6 @@ class _HistoryState extends State<HistoryPage> {
       case DateMode.year:
         return Column(
           children: [
-            const SizedBox(height: 65),
             _yearPicker(),
             const SizedBox(height: 25),
           ],
@@ -161,7 +166,7 @@ class _HistoryState extends State<HistoryPage> {
           ),
           itemBuilder: (_, index) {
             if (index < startOffset) {
-              return const SizedBox(); // EMPTY CELL
+              return const SizedBox();
             }
 
             final day = index - startOffset + 1;
@@ -254,36 +259,63 @@ class _HistoryState extends State<HistoryPage> {
   }
 
   Widget _yearPicker() {
-    final years =
-    List.generate(_endYear - _startYear + 1,
-            (i) => _startYear + i);
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: years.length,
-      gridDelegate:
-      const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.5,
-      ),
-      itemBuilder: (_, i) {
-        final year = years[i];
-        final isSelected = year == _selectedYear;
-
-        return _pickerItem(
-          label: year.toString(),
-          isSelected: isSelected,
-          onTap: () {
+    final years = List.generate(
+      _yearPageSize,
+          (i) => _yearPageStart + i,
+    );
+    return Column(
+      children: [
+        _header(
+          title:
+          '${years.first} - ${years.last}',
+          onPrev: () {
             setState(() {
-              _selectedYear = year;
-              _mode = DateMode.year;
+              _yearPageStart -= _yearPageSize;
+              if (_yearPageStart < _startYear) {
+                _yearPageStart = _startYear;
+              }
             });
           },
-        );
-      },
+          onNext: () {
+            setState(() {
+              _yearPageStart += _yearPageSize;
+              if (_yearPageStart + _yearPageSize - 1 > _endYear) {
+                _yearPageStart =
+                    _endYear - _yearPageSize + 1;
+              }
+            });
+          },
+        ),
+        const SizedBox(height: 12),
+
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: years.length,
+          gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 1.5,
+          ),
+          itemBuilder: (_, i) {
+            final year = years[i];
+            final isSelected = year == _selectedYear;
+
+            return _pickerItem(
+              label: year.toString(),
+              isSelected: isSelected,
+              onTap: () {
+                setState(() {
+                  _selectedYear = year;
+                  _mode = DateMode.year;
+                });
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -387,7 +419,6 @@ class _HistoryState extends State<HistoryPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ICON
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -450,6 +481,94 @@ class _HistoryState extends State<HistoryPage> {
     );
   }
 
+  void _showHistoryPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'History Activity',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
+                        Icons.close,
+                        size: 20,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+                Divider(color: Colors.grey.shade300),
+                _historyItem(
+                  title: 'Washing machine',
+                  days: 'Monday, Tuesday, Wednesday',
+                  start: '09:00',
+                  end: '13:00',
+                  watt: '11 watt',
+                  wattColor: Colors.red,
+                ),
+
+                Divider(color: Colors.grey.shade300),
+                _historyItem(
+                  title: 'Refrigerator',
+                  days: 'Every days',
+                  start: '09:00',
+                  end: '13:00',
+                  watt: '13 watt',
+                  wattColor: Colors.red,
+                ),
+
+                Divider(color: Colors.grey.shade300),
+                _historyItem(
+                  title: 'Air Conditioner',
+                  days: 'Every days',
+                  start: '09:00',
+                  end: '13:00',
+                  watt: '40 watt',
+                  wattColor: Colors.red,
+                ),
+
+                Divider(color: Colors.grey.shade300),
+                _historyItem(
+                  title: 'Lamp',
+                  days: 'Every days',
+                  start: '09:00',
+                  end: '13:00',
+                  watt: '50 watt',
+                  wattColor: Colors.red,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -600,39 +719,31 @@ class _HistoryState extends State<HistoryPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Text(
-                          'View All',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w500,
+                        InkWell(
+                          onTap: () {
+                            _showHistoryPopup();
+                          },
+                          child: Text(
+                            'View All',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
+
                       ],
                     ),
 
                     const SizedBox(height: 12),
                     Divider(color: Colors.grey.shade300),
-
-                    // ITEM 1
                     _historyItem(
                       title: 'Washing machine',
                       days: 'Monday, Tuesday, Wednesday',
                       start: '09:00',
                       end: '13:00',
                       watt: '11 watt',
-                      wattColor: Colors.green,
-                    ),
-
-                    Divider(color: Colors.grey.shade300),
-
-                    // ITEM 2
-                    _historyItem(
-                      title: 'Refrigerator',
-                      days: 'Every days',
-                      start: '09:00',
-                      end: '13:00',
-                      watt: '13 watt',
                       wattColor: Colors.red,
                     ),
                   ],

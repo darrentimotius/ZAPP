@@ -12,10 +12,8 @@ class AuthGate extends StatelessWidget {
     final session = Supabase.instance.client.auth.currentSession;
 
     if (session != null) {
-      // Sudah login
       return const HomePage();
     } else {
-      // Belum login
       return const WelcomePage();
     }
   }
