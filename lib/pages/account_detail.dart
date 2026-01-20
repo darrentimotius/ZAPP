@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'user_info.dart';
 
 class AccountDetailsPage extends StatelessWidget {
   const AccountDetailsPage({Key? key}) : super(key: key);
@@ -75,27 +76,38 @@ class AccountDetailsPage extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // ===== USER INFO HEADER (FULL WIDTH) =====
+          // ===== USER INFO HEADER (PENCIL CLICKABLE) =====
           Container(
-            width: double.infinity, // 🔥 full kiri kanan
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            width: double.infinity,
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             color: const Color(0xFFF2F2F2),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'User Info',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Icon(Icons.edit, size: 20),
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 20),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserInfoPage(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // ===== USER INFO CONTENT =====
           const Padding(

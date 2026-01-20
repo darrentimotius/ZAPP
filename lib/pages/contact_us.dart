@@ -70,7 +70,7 @@ class ContactUsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   _SocialRow(
-                    assetPath: 'assets/icon/telegran.png',
+                    assetPath: 'assets/icon/telegram.png',
                     label: 'Telegram',
                     username: '@zappID',
                   ),

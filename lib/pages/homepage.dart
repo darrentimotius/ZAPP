@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:zapp/pages/notifications.dart';
-import 'package:zapp/pages/profilepage.dart';
+import 'package:zapp/pages/profile_page.dart';
 
 import '../components/carousel.dart';
 import '../components/room_cart.dart';

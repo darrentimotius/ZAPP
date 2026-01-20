@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'account_detail.dart';
 import 'contact_us.dart';
+import 'change_password.dart';
+
 
 /// ======================================================
 /// PROFILE PAGE
@@ -140,7 +142,14 @@ class _ProfilePageState extends State<ProfilePage> {
             _menuItem(
               icon: Icons.lock,
               title: 'Change Password',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChangePasswordPage(),
+                  ),
+                 );
+                },
             ),
             _divider(),
 
