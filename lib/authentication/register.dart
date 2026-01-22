@@ -12,7 +12,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   bool passwordVisible = false;
   bool confirmPasswordVisible = false;
-
+  bool isLoading = false;
   String? errorText;
 
   final TextEditingController usernameCtrl = TextEditingController();
@@ -54,31 +54,48 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _completeRegistration() async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+      errorText = null;
+    });
+
     final username = usernameCtrl.text.trim();
     final password = passwordCtrl.text;
     final confirm = confirmCtrl.text;
 
-    setState(() => errorText = null);
-
     if (username.isEmpty) {
-      setState(() => errorText = 'Username is required');
+      setState(() {
+        errorText = 'Username is required';
+        isLoading = false;
+      });
       return;
     }
 
     final passwordError = validatePassword(password);
     if (passwordError != null) {
-      setState(() => errorText = passwordError);
+      setState(() {
+        errorText = passwordError;
+        isLoading = false;
+      });
       return;
     }
 
     if (password != confirm) {
-      setState(() => errorText = 'Password and confirmation do not match');
+      setState(() {
+        errorText = 'Password and confirmation do not match';
+        isLoading = false;
+      });
       return;
     }
 
     final user = supabase.auth.currentUser;
     if (user == null) {
-      setState(() => errorText = 'Session expired, please log in again');
+      setState(() {
+        errorText = 'Session expired, please log in again';
+        isLoading = false;
+      });
       return;
     }
 
@@ -86,26 +103,31 @@ class _RegisterPageState extends State<RegisterPage> {
       await supabase.auth.updateUser(
         UserAttributes(password: password),
       );
+
       await supabase.from('profiles').insert({
         'user_id': user.id,
         'username': username,
-        'email': user.email
+        'email': user.email,
       });
 
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
-      debugPrint('REGISTER ERROR: $e');
-      setState(() =>
-      errorText = 'Username already exists or an error occurred');
+      setState(() {
+        errorText = 'Username already exists or an error occurred';
+      });
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AuthLayout(
-      buttonText: "Create New Account",
-      onButtonPressed: _completeRegistration,
+      buttonText: isLoading ? "Creating..." : "Create New Account",
+      onButtonPressed: isLoading ? null : _completeRegistration,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

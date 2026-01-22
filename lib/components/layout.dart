@@ -25,7 +25,7 @@ class AuthLayout extends StatelessWidget {
                 child: content,
               ),
             ),
-            if (buttonText != null && onButtonPressed != null)
+            if (buttonText != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: SizedBox(
@@ -34,7 +34,9 @@ class AuthLayout extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onButtonPressed,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E64A5),
+                      backgroundColor: onButtonPressed == null
+                          ? Colors.grey
+                          : const Color(0xFF2E64A5),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

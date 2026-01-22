@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../components/layout.dart';
 import 'dart:async';
@@ -27,7 +27,7 @@ class _EmailPageState extends State<EmailPage> {
 
   int? redirectCountdown;
   Timer? redirectTimer;
-
+  bool isLoading = false;
   Future<bool> isEmailRegistered(String email) async {
     final res = await supabase
         .from('profiles')
@@ -90,12 +90,15 @@ class _EmailPageState extends State<EmailPage> {
     );
 
     return AuthLayout(
-      buttonText: "Send OTP",
-      onButtonPressed: () async {
+      buttonText: isLoading ? "Sending..." : "Send OTP",
+      onButtonPressed: isLoading
+          ? null
+          : () async {
         if (_formKey.currentState!.validate()) {
           final email = emailCtrl.text.trim();
 
           setState(() {
+            isLoading = true;
             errorMessage = null;
           });
 
@@ -108,6 +111,7 @@ class _EmailPageState extends State<EmailPage> {
 
             await _sendOtp(email);
 
+            if (!mounted) return;
             Navigator.pushReplacementNamed(
               context,
               '/otp',
@@ -117,6 +121,10 @@ class _EmailPageState extends State<EmailPage> {
             setState(() {
               errorMessage = "Failed to send OTP. Please try again.";
             });
+          } finally {
+            if (mounted) {
+              setState(() => isLoading = false);
+            }
           }
         }
       },
