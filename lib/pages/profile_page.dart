@@ -21,6 +21,35 @@ class _ProfilePageState extends State<ProfilePage> {
   bool notificationEnabled = true;
   static const Color primaryBlue = Color(0xFF053886);
 
+  User? user;
+  String? username;
+  String? email;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final supabase = Supabase.instance.client;
+
+    final currentUser = supabase.auth.currentUser;
+    if (currentUser == null) return;
+
+    final response = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('user_id', currentUser.id)
+        .single();
+
+    setState(() {
+      user = currentUser;
+      email = currentUser.email;
+      username = response['username'];
+    });
+  }
+
   void _showLogoutDialog() {
     showDialog(
       context: context,
@@ -96,20 +125,41 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(width: 16),
+                  // Column(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children:
+                    // const [
+                    //   Text(
+                    //     'Darren Samuel Nathan',
+                    //     style: TextStyle(
+                    //       fontSize: 16,
+                    //       fontWeight: FontWeight.bold,
+                    //     ),
+                    //   ),
+                    //   SizedBox(height: 4),
+                    //   Text(
+                    //     'darrensamuelnathan@gmail.com',
+                    //     style: TextStyle(
+                    //       fontSize: 13,
+                    //       color: Colors.grey,
+                    //     ),
+                    //   ),
+                    // ],
+                  // ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Darren Samuel Nathan',
-                        style: TextStyle(
+                        username ?? '-',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        'darrensamuelnathan@gmail.com',
-                        style: TextStyle(
+                        email ?? '-',
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Colors.grey,
                         ),

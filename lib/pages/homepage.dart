@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:zapp/pages/notifications.dart';
 import 'package:zapp/pages/profile_page.dart';
 
@@ -49,22 +50,22 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 6),
         AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation){
-              return FadeTransition(opacity: animation, child: child);
-            },
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
           child: isActive
-            ? Text(
-                label,
-                key : ValueKey(label),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue,
-                ),
-            )
-          : const SizedBox.shrink(),
-          ),
+              ? Text(
+            label,
+            key: ValueKey(label),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.blue,
+            ),
+          )
+              : const SizedBox.shrink(),
+        ),
       ],
     );
   }
@@ -104,13 +105,48 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
     );
   }
 }
 
-class HomeContent extends StatelessWidget {
+/// ======================================================
+/// HOME CONTENT (OPTION 1 – FETCH USERNAME FROM SUPABASE)
+/// ======================================================
+
+class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  String? username;
+  User? user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+  }
+
+  Future<void> _loadUsername() async {
+    final supabase = Supabase.instance.client;
+
+    final currentUser = supabase.auth.currentUser;
+    if (currentUser == null) return;
+
+    final response = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('user_id', currentUser.id)
+        .single();
+
+    setState(() {
+      user = currentUser;
+      username = response['username'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +177,7 @@ class HomeContent extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const ProfilePage()
+                builder: (context) => const ProfilePage(),
               ),
             );
           },
@@ -173,40 +209,55 @@ class HomeContent extends StatelessWidget {
                   pause: const Duration(milliseconds: 1000),
                   animatedTexts: [
                     TyperAnimatedText("Hi",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Halo",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Bonjour",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Hola",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Aloha",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("您好",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("こんにちは",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("안녕하세요",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Zdravstvuyte",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Sàwàtdee",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Guten Tag",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Ciao",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("مرحبا",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                     TyperAnimatedText("Olá",
-                        textStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        textStyle:
+                        const TextStyle(fontSize: 14, color: Colors.grey)),
                   ],
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
-                "Darren Samuel Nathan",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Text(
+                username ?? '-',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ],
           ),
@@ -217,7 +268,7 @@ class HomeContent extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const NotificationsPage(),
+                builder: (context) => const NotificationsPage(),
               ),
             );
           },
@@ -236,7 +287,7 @@ class HomeContent extends StatelessWidget {
         ),
         OutlinedButton(
           onPressed: () async {
-            final result = await Navigator.push(
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const AddRoom(),
@@ -247,7 +298,6 @@ class HomeContent extends StatelessWidget {
         ),
       ],
     );
-
   }
 
   Widget _roomGrid() {
@@ -279,7 +329,6 @@ class HomeContent extends StatelessWidget {
       },
     ];
 
-
     return Wrap(
       spacing: 12,
       runSpacing: 12,
@@ -291,6 +340,5 @@ class HomeContent extends StatelessWidget {
         );
       }).toList(),
     );
-
   }
 }
