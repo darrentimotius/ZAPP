@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:zapp/cache/user_cache.dart';
 import 'package:zapp/pages/notifications.dart';
 import 'package:zapp/pages/profile_page.dart';
+import 'package:zapp/routes/route_observer.dart';
 
 import '../components/carousel.dart';
 import '../components/room_cart.dart';
@@ -109,10 +113,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// ======================================================
-/// HOME CONTENT (OPTION 1 – FETCH USERNAME FROM SUPABASE)
-/// ======================================================
-
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
 
@@ -120,9 +120,11 @@ class HomeContent extends StatefulWidget {
   State<HomeContent> createState() => _HomeContentState();
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _HomeContentState extends State<HomeContent> with RouteAware{
   String? username;
   User? user;
+  Timer? _retryTimer;
+  bool _isFetching = false;
 
   @override
   void initState() {
@@ -130,22 +132,87 @@ class _HomeContentState extends State<HomeContent> {
     _loadUsername();
   }
 
+  void _startRetryTimer() {
+    _retryTimer?.cancel();
+    _retryTimer = Timer.periodic(
+      const Duration(seconds: 5),
+          (_) => _loadUsername(),
+    );
+  }
+
+  void _stopRetryTimer() {
+    _retryTimer?.cancel();
+  }
+
+  @override
+  void didPush() {
+    _startRetryTimer();
+  }
+
+  @override
+  void didPopNext() {
+    _startRetryTimer();
+  }
+
+  @override
+  void didPushNext() {
+    _stopRetryTimer();
+  }
+
   Future<void> _loadUsername() async {
-    final supabase = Supabase.instance.client;
+    if (UserCache.isReady) {
+      setState(() {
+        user = UserCache.user;
+        username = UserCache.username;
+      });
+      return;
+    }
 
-    final currentUser = supabase.auth.currentUser;
-    if (currentUser == null) return;
+    if (_isFetching) return;
 
-    final response = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('user_id', currentUser.id)
-        .single();
+    _isFetching = true;
 
-    setState(() {
-      user = currentUser;
-      username = response['username'];
-    });
+    try{
+      final supabase = Supabase.instance.client;
+
+      final currentUser = supabase.auth.currentUser;
+      if (currentUser == null) return;
+
+      final response = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('user_id', currentUser.id)
+          .single();
+
+      UserCache.user = currentUser;
+      UserCache.email = currentUser.email;
+      UserCache.username = response['username'];
+
+      if (!mounted) return;
+      setState(() {
+        user = currentUser;
+        username = response['username'];
+      });
+
+      _retryTimer?.cancel();
+    } catch(e) {
+      debugPrint('Homepage: fetch failed, will retry...');
+    } finally {
+      _isFetching = false;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    _retryTimer?.cancel();
+    super.dispose();
   }
 
   @override

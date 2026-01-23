@@ -1,8 +1,29 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'user_info.dart';
 
-class AccountDetailsPage extends StatelessWidget {
+class AccountDetailsPage extends StatefulWidget {
   const AccountDetailsPage({Key? key}) : super(key: key);
+
+  @override
+  State<AccountDetailsPage> createState() => _AccountDetailsPageState();
+}
+
+class _AccountDetailsPageState extends State<AccountDetailsPage> {
+  File? _imageFile;
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? picked =
+    await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      setState(() {
+        _imageFile = File(picked.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +40,6 @@ class AccountDetailsPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ===== TITLE =====
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
@@ -33,27 +53,32 @@ class AccountDetailsPage extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // ===== PROFILE IMAGE =====
           Center(
             child: Stack(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 45,
-                  backgroundImage: AssetImage('assets/icon/profile.jpg'),
+                  backgroundImage: _imageFile != null
+                      ? FileImage(_imageFile!)
+                      : const AssetImage('assets/icon/profile.jpg')
+                  as ImageProvider,
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt,
-                      size: 18,
-                      color: Colors.black,
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        size: 18,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -63,7 +88,6 @@ class AccountDetailsPage extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ===== USERNAME =====
           const Center(
             child: Text(
               'Darren SN',
@@ -76,7 +100,6 @@ class AccountDetailsPage extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // ===== USER INFO HEADER (PENCIL CLICKABLE) =====
           Container(
             width: double.infinity,
             height: 40,
@@ -109,7 +132,6 @@ class AccountDetailsPage extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ===== USER INFO CONTENT =====
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -125,13 +147,9 @@ class AccountDetailsPage extends StatelessWidget {
                 SizedBox(height: 6),
                 Text(
                   'Darren Samuel Nathan',
-                  style: TextStyle(
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(fontSize: 15),
                 ),
-
                 SizedBox(height: 20),
-
                 Text(
                   'Email',
                   style: TextStyle(
@@ -142,9 +160,7 @@ class AccountDetailsPage extends StatelessWidget {
                 SizedBox(height: 6),
                 Text(
                   'Darrensamuelnathan@gmail.com',
-                  style: TextStyle(
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(fontSize: 15),
                 ),
               ],
             ),

@@ -1,15 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:zapp/cache/user_cache.dart';
 import 'account_detail.dart';
 import 'contact_us.dart';
 import 'change_password.dart';
 import 'package:dio/dio.dart';
-
-
-/// ======================================================
-/// PROFILE PAGE
-/// ======================================================
-
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -25,12 +22,19 @@ class _ProfilePageState extends State<ProfilePage> {
   User? user;
   String? username;
   String? email;
+  Timer? _retryTimer;
+  bool _isFetching = false;
 
   @override
   void initState() {
     super.initState();
     _testMeEndpoint();
     _loadUserProfile();
+
+    _retryTimer = Timer.periodic(
+      const Duration(seconds: 5),
+          (_) => _loadUserProfile(),
+    );
   }
 
   Future<void> _testMeEndpoint() async {
@@ -73,22 +77,53 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserProfile() async {
-    final supabase = Supabase.instance.client;
+    if (UserCache.isReady) {
+      setState(() {
+        user = UserCache.user;
+        username = UserCache.username;
+        email = UserCache.email;
+      });
+      return;
+    }
 
-    final currentUser = supabase.auth.currentUser;
-    if (currentUser == null) return;
+    if (_isFetching) return;
 
-    final response = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('user_id', currentUser.id)
-        .single();
+    _isFetching = true;
+    try{
+      final supabase = Supabase.instance.client;
 
-    setState(() {
-      user = currentUser;
-      email = currentUser.email;
-      username = response['username'];
-    });
+      final currentUser = supabase.auth.currentUser;
+      if (currentUser == null) return;
+
+      final response = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('user_id', currentUser.id)
+          .single();
+
+      UserCache.user = currentUser;
+      UserCache.email = currentUser.email;
+      UserCache.username = response['username'];
+
+      if (!mounted) return;
+      setState(() {
+        user = currentUser;
+        email = currentUser.email;
+        username = response['username'];
+      });
+
+      _retryTimer?.cancel();
+    } catch(e) {
+      debugPrint('Profile Page: fetch failed, will retry...');
+    } finally {
+      _isFetching = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _retryTimer?.cancel();
+    super.dispose();
   }
 
   void _showLogoutDialog() {
@@ -120,6 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.pop(dialogContext);
 
                 await Supabase.instance.client.auth.signOut();
+                UserCache.clear();
 
                 if (!mounted) return;
 
@@ -154,7 +190,6 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            /// ================= PROFILE HEADER =================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -166,27 +201,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Column(
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   children:
-                    // const [
-                    //   Text(
-                    //     'Darren Samuel Nathan',
-                    //     style: TextStyle(
-                    //       fontSize: 16,
-                    //       fontWeight: FontWeight.bold,
-                    //     ),
-                    //   ),
-                    //   SizedBox(height: 4),
-                    //   Text(
-                    //     'darrensamuelnathan@gmail.com',
-                    //     style: TextStyle(
-                    //       fontSize: 13,
-                    //       color: Colors.grey,
-                    //     ),
-                    //   ),
-                    // ],
-                  // ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -215,7 +229,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
             _sectionTitle('Detail Personal'),
 
-            /// 👉 ACCOUNT DETAILS (LINK)
             _menuItem(
               icon: Icons.person,
               title: 'Account Details',
@@ -251,7 +264,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
             _sectionTitle('Other'),
 
-            /// 👉 CONTACT US (LINK)
             _menuItem(
               icon: Icons.contact_support,
               title: 'Contact Us',
@@ -277,8 +289,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  /// ================== COMPONENTS ==================
 
   Widget _sectionTitle(String title) {
     return Container(

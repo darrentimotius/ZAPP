@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:zapp/auth/auth_gate.dart';
+import 'package:zapp/routes/route_observer.dart';
 import 'authentication/welcome.dart';
 import 'authentication/login.dart';
 import 'authentication/email.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "ZAPP",
+      navigatorObservers: [routeObserver],
       home: const AuthGate(),
       routes: {
         "/login": (context) => LoginPage(),
