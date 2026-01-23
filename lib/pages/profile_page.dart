@@ -43,11 +43,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'http://10.68.105.138:3000',
+        baseUrl: 'https://api.zapp.software',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ),
     );
+
+    final sw = Stopwatch()..start();
 
     try {
       final res = await dio.get(
@@ -59,10 +61,14 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       );
 
+      sw.stop();
       debugPrint('/me RESPONSE: ${res.data}');
       debugPrint('${session.accessToken}');
+      debugPrint('API latency: ${sw.elapsedMilliseconds} ms');
+
     } catch (e) {
       debugPrint('/me ERROR: $e');
+      debugPrint('Error after: ${sw.elapsedMilliseconds} ms');
     }
   }
 
