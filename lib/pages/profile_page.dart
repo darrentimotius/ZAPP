@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'account_detail.dart';
 import 'contact_us.dart';
 import 'change_password.dart';
+import 'package:dio/dio.dart';
 
 
 /// ======================================================
@@ -28,7 +29,41 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    _testMeEndpoint();
     _loadUserProfile();
+  }
+
+  Future<void> _testMeEndpoint() async {
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session == null) {
+      debugPrint('User not logged in');
+      return;
+    }
+
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: 'http://10.68.105.138:3000',
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ),
+    );
+
+    try {
+      final res = await dio.get(
+        '/me',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${session.accessToken}',
+          },
+        ),
+      );
+
+      debugPrint('/me RESPONSE: ${res.data}');
+      debugPrint('${session.accessToken}');
+    } catch (e) {
+      debugPrint('/me ERROR: $e');
+    }
   }
 
   Future<void> _loadUserProfile() async {
