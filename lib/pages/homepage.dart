@@ -14,6 +14,10 @@ import 'calculate.dart';
 import 'history.dart';
 import 'news.dart';
 import 'addroom.dart';
+import 'Home_Office_page.dart';
+import 'Kitchen_page.dart';
+import 'Bedroom_page.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -120,7 +124,7 @@ class HomeContent extends StatefulWidget {
   State<HomeContent> createState() => _HomeContentState();
 }
 
-class _HomeContentState extends State<HomeContent> with RouteAware{
+class _HomeContentState extends State<HomeContent> with RouteAware {
   String? username;
   User? user;
   Timer? _retryTimer;
@@ -172,7 +176,7 @@ class _HomeContentState extends State<HomeContent> with RouteAware{
 
     _isFetching = true;
 
-    try{
+    try {
       final supabase = Supabase.instance.client;
 
       final currentUser = supabase.auth.currentUser;
@@ -195,7 +199,7 @@ class _HomeContentState extends State<HomeContent> with RouteAware{
       });
 
       _retryTimer?.cancel();
-    } catch(e) {
+    } catch (e) {
       debugPrint('Homepage: fetch failed, will retry...');
     } finally {
       _isFetching = false;
@@ -400,10 +404,34 @@ class _HomeContentState extends State<HomeContent> with RouteAware{
       spacing: 12,
       runSpacing: 12,
       children: items.map((e) {
-        return RoomUsageCard(
-          percentage: e["percent"] as int,
-          label: e["name"] as String,
-          imagePath: e["image"] as String,
+        return GestureDetector(
+          onTap: () {
+            if (e["name"] == "Home Office") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomeOfficePage(),
+                ),
+              );
+            } else if (e["name"] == "Kitchen") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KitchenPage(),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${e["name"]} clicked')),
+              );
+            }
+          },
+
+          child: RoomUsageCard(
+            percentage: e["percent"] as int,
+            label: e["name"] as String,
+            imagePath: e["image"] as String,
+          ),
         );
       }).toList(),
     );
