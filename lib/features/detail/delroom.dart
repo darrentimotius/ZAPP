@@ -84,7 +84,7 @@ class _DeleteRoomPageState extends State<DeleteRoomPage> {
             },
             child: const Text(
               "Delete",
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: Color(0xFFFF0000)),
             ),
           ),
         ],

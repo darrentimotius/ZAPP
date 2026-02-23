@@ -123,7 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
               style: TextButton.styleFrom(
-                foregroundColor: primaryBlue,
+                foregroundColor: Color(0xFFFF0000),
               ),
               child: const Text(
                 'Log out',
@@ -268,12 +268,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return ListTile(
       leading: Icon(
         icon,
-        color: isLogout ? Colors.red : primaryBlue,
+        color: isLogout ? Color(0xFFFF0000) : primaryBlue,
       ),
       title: Text(
         title,
         style: TextStyle(
-          color: isLogout ? Colors.red : Colors.black,
+          color: isLogout ? Color(0xFFFF0000) : Colors.black,
         ),
       ),
       trailing: const Icon(Icons.chevron_right),

@@ -444,7 +444,7 @@ class _HomeContentState extends State<HomeContent> with RouteAware {
           children: [
             if (_isSelectionMode && _selectedRoomIds.isNotEmpty)
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                icon: const Icon(Icons.delete, color:Color(0xFFFF0000)),
                 onPressed: _deleteSelectedRooms,
               ),
             if (!_isSelectionMode)
